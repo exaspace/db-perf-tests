@@ -42,7 +42,3 @@ class AerospikeProductStoreScenario:
         key = ('test', 'products', product_id)
         key2, meta, bins = self.client.get(key)
         return bins['description']
-
-
-if __name__ == "__main__":
-    AerospikeProductStoreScenario(LOCALHOST, num_products=1000, num_queries=5000).execute()

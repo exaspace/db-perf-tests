@@ -36,8 +36,6 @@ class RedisProductStoreScenarioUsingHashes:
             }
             product_id = product['product_id']
             self.client.hset(f"product:{product_id}", mapping=value)
-            # self.client.set(f"title.{product_id}", p['title'])
-            # self.client.set(f"description.{product_id}", p['description'])
 
     def get_product_title(self, product_id):
         return utf8(self.client.hget(f"product:{product_id}", 'title'))
@@ -66,8 +64,3 @@ class RedisProductStoreScenarioUsingSimpleKV:
 
     def get_product_desc(self, product_id):
         return utf8(self.client.get(f"description.{product_id}"))
-
-
-if __name__ == "__main__":
-    RedisProductStoreScenarioUsingSimpleKV(LOCALHOST, num_products=10, num_queries=100).execute()
-    RedisProductStoreScenarioUsingHashes(LOCALHOST, num_products=10, num_queries=100).execute()
