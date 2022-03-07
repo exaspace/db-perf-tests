@@ -21,7 +21,8 @@ class Clock:
 
     def report(self, count):
         secs = self.t2 - self.t1
-        print(f"{self.desc}\t{round(count/secs, 1)} per second ({count} in {round(secs)} seconds)")
+        rate = count/secs if secs > 0 else 0
+        print(f"{self.desc}\t{round(rate, 1)} per second ({count} in {round(secs, 1)} seconds)")
 
     def stop_and_report(self, count):
         self.stop()

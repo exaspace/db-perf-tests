@@ -27,11 +27,7 @@ class AerospikeProductStoreScenario:
     def load_products(self, products):
         for product in products:
             key = ('test', 'products', product['product_id'])
-            value = {
-                'title': product['title'],
-                'description': product['description'],
-            }
-            self.client.put(key, value)
+            self.client.put(key, product)
 
     def get_product_title(self, product_id):
         key = ('test', 'products', product_id)

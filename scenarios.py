@@ -5,14 +5,23 @@ from clock import Timer
 
 
 class ProductStoreScenario:
+    MAX_NUM_PRODUCTS = 1_000_000
 
     def __init__(self, num_products, num_queries):
-        self.num_queries = num_queries
-        ecom = EcommerceGenerator(num_products)
-        self.products = list(ecom.gen_products())
+        assert num_products < self.MAX_NUM_PRODUCTS, \
+            '''
+            Use smaller number of products as this scenario stores all products in memory before 
+            passing them to the implementation's load_products function.
+            '''
 
-    def _check_products_stored_correctly(self, impl):
-        test_products = [random.choice(self.products) for _ in range(3)]
+        self.num_queries = num_queries
+        ecom = EcommerceGenerator()
+        self.products = list(ecom.gen_products(num_products))
+        p = self.products[0]
+        print(f"Generated {num_products} products (example: {p['product_id']} '{p['title']}')")
+
+    def _check_products_stored_correctly(self, impl, num_to_check=3):
+        test_products = [random.choice(self.products) for _ in range(num_to_check)]
         for p in test_products:
             title = impl.get_product_title(p['product_id'])
             desc = impl.get_product_desc(p['product_id'])
