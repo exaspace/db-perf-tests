@@ -2,6 +2,7 @@ aerospike
 redis
 pandas
 psycopg2-binary
+pymongo
 
 pytest
 

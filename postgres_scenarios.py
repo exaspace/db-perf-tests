@@ -1,5 +1,5 @@
 import psycopg2
-
+from psycopg2.extras import execute_values
 from scenarios import ProductStoreScenario
 
 LOCALHOST = {
@@ -30,6 +30,11 @@ class PostgresProductStoreScenario:
 
     INSERT_SQL = """
     INSERT INTO products (product_id, created_ts, title, description, url, price) 
+    VALUES %s
+    """
+
+    INSERT_SQL_1 = """
+    INSERT INTO products (product_id, created_ts, title, description, url, price) 
     VALUES (%(product_id)s, %(created_ts)s, %(title)s, %(description)s, %(url)s, %(price)s)
     """
 
@@ -37,20 +42,29 @@ class PostgresProductStoreScenario:
         self.conn = new_postgres_client(config)
         self.scenario = ProductStoreScenario(num_products, num_queries)
 
-    def _init(self):
+    def _clean_create(self):
         curs = self.conn.cursor()
         curs.execute(self.CREATE_SQL)
         self.conn.commit()
         curs.close()
 
     def execute(self):
-        self._init()
+        self._clean_create()
         self.scenario.execute(self)
 
     def load_products(self, products):
         curs = self.conn.cursor()
+        seq = [(p['product_id'], p['created_ts'], p['title'], p['description'], p['url'], p['price'])
+               for p in products]
+        execute_values(curs, self.INSERT_SQL, seq)
+        self.conn.commit()
+        curs.close()
+
+    def load_products_naive(self, products):
+        # WARNING: this will be far slower than using execute_values()
+        curs = self.conn.cursor()
         for i, product in enumerate(products):
-            curs.execute(self.INSERT_SQL, product)
+            curs.execute(self.INSERT_SQL_1, product)
             if i % 1000 == 0:
                 self.conn.commit()
         self.conn.commit()

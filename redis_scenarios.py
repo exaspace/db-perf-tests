@@ -26,7 +26,11 @@ class RedisProductStoreScenarioUsingHashes:
         self.scenario = ProductStoreScenario(num_products, num_queries)
 
     def execute(self):
+        self._clean()
         self.scenario.execute(self)
+
+    def _clean(self):
+        self.client.flushdb()
 
     def load_products(self, products):
         for product in products:
