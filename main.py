@@ -9,11 +9,12 @@ from redis_scenarios import RedisProductStoreScenarioUsingHashes
 
 if __name__ == "__main__":
 
-    sizes = [(200, 200), (1_000, 2_000), (10_000, 2_000)]
+    sizes = [(200, 200), (1_000, 2_000), (10_000, 20_000)]
 
-    size_choice = 1
+    size_choice = 0
     run = [
         'aerospike',
+        'cockroach',
         'redis',
         'postgres',
         'mongo',
@@ -24,6 +25,9 @@ if __name__ == "__main__":
 
     if 'aerospike' in run:
         AerospikeProductStoreScenario(aerospike_scenarios.LOCALHOST, num_products=np, num_queries=nq).execute()
+
+    if 'cockroach' in run:
+        PostgresProductStoreScenario(postgres_scenarios.LOCALHOST_COCKROACH, num_products=np, num_queries=nq).execute()
 
     if 'mongo' in run:
         MongoProductStoreScenario(mongo_scenarios.LOCALHOST, num_products=np, num_queries=nq).execute()

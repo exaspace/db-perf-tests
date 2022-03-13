@@ -6,18 +6,29 @@ LOCALHOST = {
     'dbname': 'postgres',
     'user': 'postgres',
     'host': 'localhost',
+    'port': '5432',
     'password': ' ',
+}
+
+LOCALHOST_COCKROACH = {
+    'dbname': 'postgres',
+    'user': 'root',
+    'host': 'localhost',
+    'port': '26257',
+    'password': '',
 }
 
 
 def new_postgres_client(config):
     return psycopg2.connect(
-        f"host={config['host']} dbname={config['dbname']} user={config['user']} password={config['password']}")
+        f"host={config['host']} port={config['port']} dbname={config['dbname']} user={config['user']} password={config['password']}")
 
 
 class PostgresProductStoreScenario:
+    DROP_SQL = """
+        DROP TABLE IF EXISTS products;"""
+
     CREATE_SQL = """
-        DROP TABLE IF EXISTS products;
         CREATE TABLE products (
             product_id VARCHAR(44) PRIMARY KEY NOT NULL, 
             created_ts BIGINT NOT NULL,
@@ -44,6 +55,8 @@ class PostgresProductStoreScenario:
 
     def _clean_create(self):
         curs = self.conn.cursor()
+        curs.execute(self.DROP_SQL)
+        self.conn.commit()
         curs.execute(self.CREATE_SQL)
         self.conn.commit()
         curs.close()

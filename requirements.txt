@@ -1,4 +1,5 @@
 aerospike
+elasticsearch
 redis
 pandas
 psycopg2-binary
