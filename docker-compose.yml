@@ -1,0 +1,70 @@
+# Latest version as of 2022-03-12
+
+version: "3.9"
+services:
+
+  aerospike:
+    image: aerospike:ce-5.7.0.10
+    ports:
+      - 3000-3002:3000-3002
+
+  cockroach:
+    image: cockroachdb/cockroach:v21.2.6
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    command: start-single-node --insecure
+#    volumes:
+#      - "${PWD}/cockroach-data/crdb:/cockroach/cockroach-data"
+
+#  elasticsearch:
+#    image: elasticsearch:8.1.0
+#    environment:
+#      - discovery.type=single-node
+#      - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
+#    ports:
+#      - 9200:9200
+#      - 9300:9300
+
+#    networks:
+#      app_net:
+#        ipv4_address: 172.16.240.11
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+
+  postgres:
+    image: postgres:14.2
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  redis:
+    image: redis:6.2.6-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --save 60 1 --loglevel warn
+
+  yugabyte:
+    image: yugabytedb/yugabyte:2.13.0.0-b42
+    ports:
+      - 5433:5433
+      - 7000:7000
+      - 9000:9000
+      - 9042:9042
+      - 9100:9100
+      - 11000:11000
+      - 12000:12000
+      - 13000:13000
+    command: >
+      bin/yugabyted start --daemon=false
+
+#networks:
+#  app_net:
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: "172.16.240.0/24"
