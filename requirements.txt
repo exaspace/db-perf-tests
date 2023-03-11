@@ -1,11 +1,10 @@
 aerospike
 elasticsearch
-redis
+faker
 pandas
 psycopg2-binary
 pymongo
+redis
 
 pytest
 
-
--e "/Users/ben/dev/exaspace-datagen"

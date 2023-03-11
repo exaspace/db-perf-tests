@@ -59,6 +59,14 @@ class PostgresProductStoreScenario:
     VALUES (%(product_id)s, %(created_ts)s, %(title)s, %(description)s, %(url)s, %(price)s)
     """
 
+    QUERY_TITLE = """
+    SELECT title FROM products WHERE product_id = %s
+    """
+
+    QUERY_DESC = """
+    SELECT description FROM products WHERE product_id = %s
+    """
+
     def __init__(self, config, num_products, num_queries):
         self.conn = new_postgres_client(config)
         self.scenario = ProductStoreScenario(num_products, num_queries)
@@ -77,6 +85,7 @@ class PostgresProductStoreScenario:
 
     def load_products(self, products):
         curs = self.conn.cursor()
+        # WARNING: builds large sequence in memory
         seq = [(p['product_id'], p['created_ts'], p['title'], p['description'], p['url'], p['price'])
                for p in products]
         execute_values(curs, self.INSERT_SQL, seq)
@@ -95,12 +104,12 @@ class PostgresProductStoreScenario:
 
     def get_product_title(self, product_id):
         with self.conn.cursor() as curs:
-            curs.execute('SELECT title FROM products WHERE product_id = %s', (product_id,))
+            curs.execute(self.QUERY_TITLE, (product_id,))
             return curs.fetchone()[0]
 
     def get_product_desc(self, product_id):
         with self.conn.cursor() as curs:
-            curs.execute('SELECT description FROM products WHERE product_id = %s', (product_id,))
+            curs.execute(self.QUERY_DESC, (product_id,))
             return curs.fetchone()[0]
 
 

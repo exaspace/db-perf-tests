@@ -4,12 +4,12 @@ version: "3.9"
 services:
 
   aerospike:
-    image: aerospike:ce-5.7.0.10
+    image: aerospike:ce-6.2.0.3
     ports:
       - 3000-3002:3000-3002
 
   cockroach:
-    image: cockroachdb/cockroach:v21.2.6
+    image: cockroachdb/cockroach:v22.2.6
     ports:
       - "26257:26257"
       - "8080:8080"
@@ -31,28 +31,28 @@ services:
 #        ipv4_address: 172.16.240.11
 
   mongo:
-    image: mongo:latest
+    image: mongo:6.0.4
     ports:
       - 27017:27017
 
   postgres:
-    image: postgres:14.2
+    image: postgres:14.7
     ports:
       - 5432:5432
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
 
   redis:
-    image: redis:6.2.6-alpine
+    image: redis:7.0.9-alpine
     ports:
       - 6379:6379
-    command: redis-server --save 60 1 --loglevel warn
+    command: redis-server --save 60 1 --loglevel warning
 
   yugabyte:
-    image: yugabytedb/yugabyte:2.13.0.0-b42
+    image: yugabytedb/yugabyte:2.16.2.0-b41
     ports:
       - 5433:5433
-      - 7000:7000
+      - 7001:7000
       - 9000:9000
       - 9042:9042
       - 9100:9100

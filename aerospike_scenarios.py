@@ -22,8 +22,7 @@ class AerospikeProductStoreScenario:
     SET = 'products'
 
     def __init__(self, config, num_products, num_queries):
-        self.client : aerospike.Client = new_aerospike_client(config)
-        print(type(self.client))
+        self.client: aerospike.Client = new_aerospike_client(config)
         self.scenario = ProductStoreScenario(num_products, num_queries)
 
     def execute(self):
