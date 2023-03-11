@@ -1,0 +1,33 @@
+
+aerospike_local:
+  hosts:
+    - 127.0.0.1:3000
+
+cockroach_local:
+  dbname: 'postgres'
+  user: 'root'
+  host: 'localhost'
+  port: '26257'
+  password: ''
+
+mongo_local:
+  url: 'localhost:27017'
+
+postgres_local:
+  dbname: 'postgres'
+  user: 'postgres'
+  host: 'localhost'
+  port: 5490
+  password: ' '
+
+redis_local:
+  host: 'localhost'
+  port: 6379
+  db: 0
+
+yugabyte_local:
+  dbname: 'postgres'
+  user: 'postgres'
+  host: 'localhost'
+  port: '5433'
+  password: ''

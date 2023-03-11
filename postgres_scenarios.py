@@ -1,40 +1,20 @@
 import json
+from dataclasses import asdict
+from typing import Dict, Any, Sequence
 
 import psycopg2
 from psycopg2.extras import execute_values
-from scenarios import ProductStoreScenario
 
-LOCALHOST = {
-    'dbname': 'postgres',
-    'user': 'postgres',
-    'host': 'localhost',
-    'port': '5432',
-    'password': ' ',
-}
-
-LOCALHOST_COCKROACH = {
-    'dbname': 'postgres',
-    'user': 'root',
-    'host': 'localhost',
-    'port': '26257',
-    'password': '',
-}
-
-LOCALHOST_YUGABYTE = {
-    'dbname': 'postgres',
-    'user': 'postgres',
-    'host': 'localhost',
-    'port': '5433',
-    'password': '',
-}
+from scenarios import ProductStoreScenarioImpl, Product
 
 
-def new_postgres_client(config):
+def _new_postgres_client(config):
     return psycopg2.connect(
-        f"host={config['host']} port={config['port']} dbname={config['dbname']} user={config['user']} password={config['password']}")
+        f"host={config['host']} port={config['port']} dbname={config['dbname']}" +
+        f" user={config['user']} password={config['password']}")
 
 
-class PostgresProductStoreScenario:
+class PostgresProductStoreScenario(ProductStoreScenarioImpl):
     DROP_SQL = """
         DROP TABLE IF EXISTS products;"""
 
@@ -67,11 +47,10 @@ class PostgresProductStoreScenario:
     SELECT description FROM products WHERE product_id = %s
     """
 
-    def __init__(self, config, num_products, num_queries):
-        self.conn = new_postgres_client(config)
-        self.scenario = ProductStoreScenario(num_products, num_queries)
+    def __init__(self, config: Dict[str, Any]):
+        self.conn = _new_postgres_client(config)
 
-    def _clean_create(self):
+    def clean(self) -> None:
         curs = self.conn.cursor()
         curs.execute(self.DROP_SQL)
         self.conn.commit()
@@ -79,20 +58,16 @@ class PostgresProductStoreScenario:
         self.conn.commit()
         curs.close()
 
-    def execute(self):
-        self._clean_create()
-        self.scenario.execute(self)
-
-    def load_products(self, products):
+    def load_products(self, products: Sequence[Product]) -> None:
         curs = self.conn.cursor()
         # WARNING: builds large sequence in memory
-        seq = [(p['product_id'], p['created_ts'], p['title'], p['description'], p['url'], p['price'])
+        seq = [(p.product_id, p.created_ts, p.title, p.description, p.url, p.price)
                for p in products]
         execute_values(curs, self.INSERT_SQL, seq)
         self.conn.commit()
         curs.close()
 
-    def load_products_naive(self, products):
+    def load_products_naive(self, products: Sequence[Product]) -> None:
         # WARNING: this will be far slower than using execute_values()
         curs = self.conn.cursor()
         for i, product in enumerate(products):
@@ -102,18 +77,18 @@ class PostgresProductStoreScenario:
         self.conn.commit()
         curs.close()
 
-    def get_product_title(self, product_id):
+    def get_product_title(self, product_id: str) -> str:
         with self.conn.cursor() as curs:
             curs.execute(self.QUERY_TITLE, (product_id,))
             return curs.fetchone()[0]
 
-    def get_product_desc(self, product_id):
+    def get_product_desc(self, product_id: str) -> str:
         with self.conn.cursor() as curs:
             curs.execute(self.QUERY_DESC, (product_id,))
             return curs.fetchone()[0]
 
 
-class PostgresProductStoreScenarioJson:
+class PostgresProductStoreScenarioJson(ProductStoreScenarioImpl):
     DROP_SQL = """
         DROP TABLE IF EXISTS products_json;"""
 
@@ -132,11 +107,10 @@ class PostgresProductStoreScenarioJson:
     VALUES %s
     """
 
-    def __init__(self, config, num_products, num_queries):
-        self.conn = new_postgres_client(config)
-        self.scenario = ProductStoreScenario(num_products, num_queries)
+    def __init__(self, config: Dict[str, Any]):
+        self.conn = _new_postgres_client(config)
 
-    def _clean_create(self):
+    def clean(self) -> None:
         with self.conn.cursor() as curs:
             curs.execute(self.DROP_SQL)
             self.conn.commit()
@@ -145,23 +119,19 @@ class PostgresProductStoreScenarioJson:
             curs.execute(self.CREATE_INDEX_SQL)
             self.conn.commit()
 
-    def execute(self):
-        self._clean_create()
-        self.scenario.execute(self)
-
-    def load_products(self, products):
+    def load_products(self, products: Sequence[Product]) -> None:
         with self.conn.cursor() as curs:
-            seq = [(json.dumps(p),) for p in products]
+            seq = [(json.dumps(asdict(p)),) for p in products]
             execute_values(curs, self.INSERT_SQL, seq)
             self.conn.commit()
 
-    def get_product_title(self, product_id):
+    def get_product_title(self, product_id: str) -> str:
         with self.conn.cursor() as curs:
             curs.execute('SELECT doc->>\'title\' FROM products_json WHERE doc->>\'product_id\' = %s',
                          (product_id,))
             return curs.fetchone()[0]
 
-    def get_product_desc(self, product_id):
+    def get_product_desc(self, product_id: str) -> str:
         with self.conn.cursor() as curs:
             curs.execute('SELECT doc->>\'description\' FROM products_json WHERE doc->>\'product_id\' = %s',
                          (product_id,))
