@@ -6,7 +6,7 @@ from aerospike_scenarios import AerospikeProductStoreScenario
 from mongo_scenarios import MongoProductStoreScenario
 from postgres_scenarios import PostgresProductStoreScenario, PostgresProductStoreScenarioJson
 from redis_scenarios import RedisProductStoreScenarioUsingHashes
-from scenarios import ProductStoreScenario
+from scenarios import ProductStoreScenario, report_scenario
 
 SIZE_ARGS = ["small", "medium", "large"]
 
@@ -97,7 +97,8 @@ def main():
     main_class = scenario_definition['main_class']
     scenario = main_class(size=size)
     impl_config = all_configs[args.connection]
-    _timer = scenario.execute(impl_class(impl_config))
+    timer = scenario.execute(impl_class(impl_config))
+    report_scenario(args.scenario, args.impl, args.size, timer)
 
 
 if __name__ == "__main__":

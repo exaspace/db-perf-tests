@@ -1,3 +1,4 @@
+import json
 import random
 import time
 from dataclasses import dataclass
@@ -109,3 +110,12 @@ class ProductStoreScenario:
             impl.get_product_desc(p.product_id)
         timer.stop_phase(self.num_queries)
         return timer
+
+
+def report_scenario(scenario: str, impl: str, size: str, timer: Timer) -> None:
+    x = {c.desc: c.rate() for c in timer.clocks} | {
+        "scenario": scenario,
+        "implementation": impl,
+        "size": size
+    }
+    print(json.dumps(x))

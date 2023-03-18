@@ -1,4 +1,6 @@
 import time
+import sys
+from typing import Sequence
 
 
 class Clock:
@@ -11,34 +13,39 @@ class Clock:
         if start:
             self.start()
 
-    def start(self):
+    def start(self) -> None:
         assert self.t1 is None
         self.t1 = time.time()
 
-    def stop(self):
+    def stop(self, count: int) -> None:
         assert self.t2 is None
         self.t2 = time.time()
-
-    def report(self, count):
-        secs = self.t2 - self.t1
-        rate = count/secs if secs > 0 else 0
-        print(f"{self.desc}\t{round(rate, 1)} per second ({count} in {round(secs, 1)} seconds)")
-
-    def stop_and_report(self, count):
-        self.stop()
         self.count = count
-        self.report(count)
+
+    def secs(self) -> int:
+        assert self.t2 is not None
+        return self.t2 - self.t1
+
+    def rate(self):
+        return round(self.count / self.secs(), 2) if self.secs() > 0 else 0
 
 
 class Timer:
 
-    def __init__(self, desc):
-        self.main_desc = desc
-        self.clocks = []
+    def __init__(self, desc: str):
+        self.desc = desc
+        self.clocks: Sequence[Clock] = []
 
-    def start_phase(self, desc):
-        clock = Clock(f'{self.main_desc}\t{desc}', start=True)
+    def start_phase(self, desc: str):
+        clock = Clock(desc, start=True)
         self.clocks.append(clock)
 
-    def stop_phase(self, count):
-        self.clocks[-1].stop_and_report(count)
+    def stop_phase(self, count: int):
+        clock = self.clocks[-1]
+        clock.stop(count)
+        self.report(clock)
+
+    def report(self, c: Clock):
+        sys.stderr.write(
+            f"{self.desc}\t{c.desc}\t{c.rate()} per second ({c.count} in {round(c.secs(), 1)} seconds)\n")
+
