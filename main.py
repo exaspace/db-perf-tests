@@ -3,6 +3,7 @@ import argparse
 import yaml
 
 from aerospike_scenarios import AerospikeProductStoreScenario
+from ignite_scenarios import IgniteProductStoreScenarioSQL
 from mongo_scenarios import MongoProductStoreScenario
 from postgres_scenarios import PostgresProductStoreScenario, PostgresProductStoreScenarioJson
 from redis_scenarios import RedisProductStoreScenarioUsingHashes
@@ -15,6 +16,7 @@ SCENARIOS = {
         "main_class": ProductStoreScenario,
         "implementations": {
             "aerospike": AerospikeProductStoreScenario,
+            "ignite": IgniteProductStoreScenarioSQL,
             "postgres": PostgresProductStoreScenario,
             "postgres_json": PostgresProductStoreScenarioJson,
             "mongo": MongoProductStoreScenario,

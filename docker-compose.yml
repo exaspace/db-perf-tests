@@ -30,6 +30,16 @@ services:
 #      app_net:
 #        ipv4_address: 172.16.240.11
 
+  ignite:
+    image: apacheignite/ignite:2.14.0-jdk11
+    environment:
+      IGNITE_WORK_DIR: /ignite-work
+    ports:
+      - "10800:10800"
+    volumes:
+      - "ignite:/ignite-work"
+      - "./ignite.conf.xml:/opt/ignite/apache-ignite/config/default-config.xml"
+
   mongo:
     image: mongo:6.0.4
     ports:
@@ -68,3 +78,6 @@ services:
 #      driver: default
 #      config:
 #        - subnet: "172.16.240.0/24"
+
+volumes:
+  ignite:
